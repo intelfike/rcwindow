@@ -69,19 +69,12 @@ func (rc *rcConfig) Draw(){
 			rc.win.Send(paint.Event{})
 			rc.change = false
 		}
-	default:
-		fmt.Println("Dot:Not running.")
-		os.Exit(1)
 	}
 }
 func (rc *rcConfig) DrawTick(tick time.Duration){
 	go func(){
 		for{
 			rc.mx.Lock()
-			if rc.state != "running"{
-				rc.mx.Unlock()
-				return
-			}
 			rc.Draw()
 			rc.mx.Unlock()
 			time.Sleep(tick)
@@ -91,6 +84,7 @@ func (rc *rcConfig) DrawTick(tick time.Duration){
 func (rc *rcConfig) Wait(){
 	switch rc.state{
 	case "running":
+		rc.Draw()
 		rc.state = "waiting"
 		rc.wg.Add(1)
 		rc.wg.Wait()
@@ -184,15 +178,15 @@ func xyWindow(rc *rcConfig){
 					case key.CodeEscape:
 						return
 					case key.CodeR:
-	 					rc.win.Send(size.Event{WidthPx:rc.Width, HeightPx:rc.Height})
+	 					rc.Draw()
 					case key.CodeUpArrow:
 						rc.ScaleX /= 1.1
 						rc.ScaleY /= 1.1
-						rc.win.Send(paint.Event{})
+						rc.Draw()
 					case key.CodeDownArrow:
 						rc.ScaleX *= 1.1
 						rc.ScaleY *= 1.1
-						rc.win.Send(paint.Event{})
+						rc.Draw()
 					}
 				}
 			case paint.Event:
