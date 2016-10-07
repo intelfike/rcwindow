@@ -23,6 +23,7 @@ rc.Wait() //OR rc.End()
 
 <h2>Example/例</h2>
 
+<img src="https://github.com/intelfike/images/blob/master/RCM2.png" width="400" height="400">
 <pre>
 package main
 
@@ -41,6 +42,29 @@ func main() {
 		rc.Dot(real(v), imag(v))
 		v *= c
 		time.Sleep(1 << 22)
+	}
+	rc.Wait()
+}
+</pre>
+<img src="https://github.com/intelfike/images/blob/master/RCW.jpg" width="400" height="400">
+<pre>
+package main
+
+import (
+	"math/cmplx"
+	"github.com/intelfike/rcwindow"
+	"time"
+)
+
+func main() {
+	rc := rcwindow.NewWindow(1, 1, 1000)
+	rc.Start()
+	c := cmplx.Pow(1i, 1.0/25.0)
+	v := 1i
+	for n := 0; n <= 400; n++{
+		rc.Dot(float64(n)/200 - 1, imag(v))
+		v *= c
+		time.Sleep(1)
 	}
 	rc.Wait()
 }
