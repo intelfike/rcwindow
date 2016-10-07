@@ -42,10 +42,11 @@ func main() {
 </pre>
 
 <h2>Argument/引数</h2>
-
-NewWindow(scaleX, scaleY, bufSize=>Dots Array(ring buffer) Size)<br>
+<b>func NewWindow(scaleX, scaleY float64, bufSize int) *rcConfig</b><br>
+NewWindow(scale(max)X, scale(max)Y, bufSize=>Dots Array(ring buffer) Size)<br>
 NewWindow(X軸の最大値、Y軸の最大値、バッファサイズ=>点の配列(リングバッファ)の大きさ)<br>
-<br>
+<br><br>
+<b>func (rc *rcConfig) Dot(x, y float64)</b><br>
 Dot(x, y)<br>
 Dot(x座標の位置, y座標の位置)<br>
 
