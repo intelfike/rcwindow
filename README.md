@@ -24,6 +24,7 @@ rc.Wait() //OR rc.End()
 <h2>Example/例</h2>
 
 <img src="https://github.com/intelfike/images/blob/master/RCM2.png" width="400" height="400">
+点がくるくる回転します。
 <pre>
 package main
 
