@@ -18,6 +18,7 @@ rc := rcwindow.NewWindow(1, 1, 10)
 //rc(struct) configration here //rc構造体をここで編集する
 rc.Start()
 rc.Dot(0.4, -0.3)
+rc.Draw()
 rc.Wait() //OR rc.End()
 </pre>
 
@@ -39,6 +40,7 @@ func main() {
 	rc.Start()
 	c := cmplx.Pow(1i, 1.0/25.0)
 	v := 1i
+	rc.DrawTick(1 << 25)
 	for n := 0; n <= 10000; n++{
 		rc.Dot(real(v), imag(v))
 		v *= c
@@ -61,6 +63,7 @@ import (
 func main() {
 	rc := rcwindow.NewWindow(1, 1, 1000)
 	rc.Start()
+	rc.DrawTick(1 << 25)
 	c := cmplx.Pow(1i, 1.0/25.0)
 	v := 1i
 	for n := 0; n <= 400; n++{
@@ -80,6 +83,10 @@ NewWindow(X軸の最大値、Y軸の最大値、バッファサイズ=>点の配
 <b>func (rc *rcConfig) Dot(x, y float64)</b><br>
 Dot(x, y)<br>
 Dot(x座標の位置, y座標の位置)<br>
+<br>
+<b>func (rc *rcConfig) DrawTick(tick time.Duration)</b>
+func (rc *rcConfig) DrawTick((redraw loop interval))
+func (rc *rcConfig) DrawTick(再描画の間隔を指定)
 
 <h2>Event/イベント</h2>
 
