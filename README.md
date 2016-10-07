@@ -18,7 +18,7 @@ rc := rcwindow.NewWindow(1, 1, 10)
 //rc(struct) configration here //rc構造体をここで編集する
 rc.Start()
 rc.Dot(0.4, -0.3)
-rc.Wait()
+rc.Wait() //OR rc.End()
 </pre>
 
 <h2>Example/例</h2>
