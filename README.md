@@ -5,6 +5,11 @@ https://ja.wikipedia.org/wiki/%E7%9B%B4%E4%BA%A4%E5%BA%A7%E6%A8%99%E7%B3%BB<br>
 English:<br>
 https://en.wikipedia.org/wiki/Cartesian_coordinate_system<br>
 
+<h2>get/入手</h2>
+
+<pre>
+go get github.com/intelfike/rcwindow
+</pre>
 
 <h2>Usage/使い方</h2>
 
