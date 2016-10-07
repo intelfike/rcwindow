@@ -192,7 +192,11 @@ func xyWindow(rc *rcConfig){
 			case paint.Event:
  				rc.win.Send(size.Event{WidthPx:rc.Width, HeightPx:rc.Height})
 			case size.Event:
-				buf, _ = s.NewBuffer(e.Size())
+				var err error
+				buf, err = s.NewBuffer(e.Size())
+				if err != nil{
+					continue
+				}
 				rc.Width = e.WidthPx
 				rc.Height = e.HeightPx
 				rc.sx = float64(rc.Width) / (rc.ScaleX * 2.0)
