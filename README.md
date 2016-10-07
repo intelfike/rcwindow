@@ -51,14 +51,14 @@ Dot(x座標の位置, y座標の位置)<br>
 
 <h2>Event/イベント</h2>
 
-click => Print x & y
-KeyPress Esc => close window
-KeyPress UpArrow => Scale / 1.2
-KeyPress DownArrow => Scale * 1.2
-KeyPress R => redraw(for debuging)
+click => Print x & y<br>
+KeyPress Esc => close window<br>
+KeyPress UpArrow => Scale / 1.2<br>
+KeyPress DownArrow => Scale * 1.2<br>
+KeyPress R => redraw(for debuging)<br>
 
-クリック => XとYの座標を計算して表示します。
-Escキー => ウインドウを閉じます。
-↑キー => スケールを1.2分の1に縮小します。
-↓キー => スケールを1.2倍に拡大します。
-Rキー => 描画を更新します。(デバッグ用)
+クリック => XとYの座標を計算して表示します。<br>
+Escキー => ウインドウを閉じます。<br>
+↑キー => スケールを1.2分の1に縮小します。<br>
+↓キー => スケールを1.2倍に拡大します。<br>
+Rキー => 描画を更新します。(デバッグ用)<br>
