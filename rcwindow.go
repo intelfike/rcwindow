@@ -7,7 +7,7 @@ import (
 	"sync"
 	"os"
 	
-	"golang.org/x/exp/shiny/driver/windriver"
+	"golang.org/x/exp/shiny/driver"
 	"golang.org/x/exp/shiny/screen"
 	
 	"golang.org/x/mobile/event/mouse"
@@ -98,14 +98,14 @@ func (rc *rcConfig)parseR(x, y float64)(float64, float64){
 	return fx, fy
 }
 
-func NewWindow(scaleX, scaleY float64, dotSize int) *rcConfig{
+func NewWindow(scaleX, scaleY float64, bufSize int) *rcConfig{
 	//set default
 	return &rcConfig{
 		ScaleX: scaleX,
 		ScaleY: scaleY,
 		Width:700,
 		Height:700,
-		Dots: make([]Dot, dotSize),
+		Dots: make([]Dot, bufSize),
 		DotSize: 2,
 		DotColor:	color.RGBA{0xff, 0xff, 0x00, 0xff},
 		AxisColor:	color.White,
@@ -114,7 +114,7 @@ func NewWindow(scaleX, scaleY float64, dotSize int) *rcConfig{
 }
 
 func xyWindow(rc *rcConfig){
-	windriver.Main(func(s screen.Screen) {
+	driver.Main(func(s screen.Screen) {
 		var op = screen.NewWindowOptions{
 			Width : rc.Width,
 			Height : rc.Height,
