@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"sync"
 	"os"
+	"time"
 	
 	"golang.org/x/exp/shiny/driver"
 	"golang.org/x/exp/shiny/screen"
@@ -33,6 +34,7 @@ type rcConfig struct{
 	mx sync.Mutex
 	sx, sy float64
 	state string
+	change bool
 	//Axis == Line
 	DotColor ,AxisColor color.Color
 }
@@ -50,15 +52,41 @@ func (rc *rcConfig) Start(){
 }
 func (rc *rcConfig) Dot(x, y float64){
 	switch rc.state{
-	case "running", "waiting":
+	case "running":
 		rc.Dots[rc.index % len(rc.Dots)] = Dot{x, y}
 		rc.index++
 		rc.index %= len(rc.Dots)
-		rc.win.Send(paint.Event{})
+		rc.change = true
 	default:
 		fmt.Println("Dot:Not running.")
 		os.Exit(1)
 	}
+}
+func (rc *rcConfig) Draw(){
+	switch rc.state{
+	case "running":
+		if rc.change{
+			rc.win.Send(paint.Event{})
+			rc.change = false
+		}
+	default:
+		fmt.Println("Dot:Not running.")
+		os.Exit(1)
+	}
+}
+func (rc *rcConfig) DrawTick(tick time.Duration){
+	go func(){
+		for{
+			rc.mx.Lock()
+			if rc.state != "running"{
+				rc.mx.Unlock()
+				return
+			}
+			rc.Draw()
+			rc.mx.Unlock()
+			time.Sleep(tick)
+		}
+	}()
 }
 func (rc *rcConfig) Wait(){
 	switch rc.state{
@@ -78,11 +106,14 @@ func (rc *rcConfig) Wait(){
 func (rc *rcConfig) End(){
 	switch rc.state{
 	case "running", "waiting":
+		rc.state = "end"
 		rc.win.Send(lifecycle.Event{To:lifecycle.StageDead})
 	default:
 		fmt.Println("End:Not running")
 		os.Exit(1)
 	}
+	rc.wg.Add(1)
+	rc.wg.Wait()
 }
 //Axis座標→window座標
 func (rc *rcConfig)parse(fx, fy float64)(int, int){
@@ -148,19 +179,19 @@ func xyWindow(rc *rcConfig){
 				}
 				
 			case key.Event:
-				if e.Direction == key.DirPress{
+				if e.Direction == key.DirNone || e.Direction == key.DirPress{
 					switch e.Code{
 					case key.CodeEscape:
 						return
 					case key.CodeR:
 	 					rc.win.Send(size.Event{WidthPx:rc.Width, HeightPx:rc.Height})
 					case key.CodeUpArrow:
-						rc.ScaleX /= 1.2
-						rc.ScaleY /= 1.2
+						rc.ScaleX /= 1.1
+						rc.ScaleY /= 1.1
 						rc.win.Send(paint.Event{})
 					case key.CodeDownArrow:
-						rc.ScaleX *= 1.2
-						rc.ScaleY *= 1.2
+						rc.ScaleX *= 1.1
+						rc.ScaleY *= 1.1
 						rc.win.Send(paint.Event{})
 					}
 				}
@@ -183,8 +214,7 @@ func xyWindow(rc *rcConfig){
 				for _, v := range rc.Dots{
 					if v.x != 0 && v.y != 0{
 						x, y := rc.parse(v.x, v.y)
-						r := image.Rect(x - rc.DotSize, y - rc.DotSize, x + rc.DotSize, y + rc.DotSize)
-						//rc.win.Fill(r,  color.RGBA{0xff, 0xff, 0x00, 0xff}, screen.Over)
+						r := image.Rect(x - rc.DotSize/2, y - rc.DotSize/2, x + int(float64(rc.DotSize)/2.0 + 0.5), y + int(float64(rc.DotSize)/2.0 + 0.5))
 						draw.Draw(buf.RGBA(), r, image.NewUniform(rc.DotColor), image.ZP, draw.Src)
 					}
 				}
@@ -202,6 +232,10 @@ func xyWindow(rc *rcConfig){
 	if rc.state == "waiting"{
 		rc.wg.Done()
 	}
+	if rc.state == "end"{
+		rc.wg.Done()
+	}
 	rc.state = ""
+	
 }
 
