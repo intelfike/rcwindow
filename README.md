@@ -41,7 +41,7 @@ func main() {
 }
 </pre>
 
-<h2>function/関数</h2>
+<h2>Argument/引数</h2>
 
 NewWindow(scaleX, scaleY, bufSize=>Dots Array(ring buffer) Size)<br>
 NewWindow(X軸の最大値、Y軸の最大値、バッファサイズ=>点の配列(リングバッファ)の大きさ)<br>
