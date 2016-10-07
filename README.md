@@ -1,6 +1,6 @@
 <h1>Rectangle Coordinates Window</h1>
 
-Japanese:<br>
+日本語:<br>
 https://ja.wikipedia.org/wiki/%E7%9B%B4%E4%BA%A4%E5%BA%A7%E6%A8%99%E7%B3%BB<br>
 English:<br>
 https://en.wikipedia.org/wiki/Cartesian_coordinate_system<br>
@@ -47,6 +47,7 @@ func main() {
 	rc.Wait()
 }
 </pre>
+<hr>
 <img src="https://github.com/intelfike/images/blob/master/RCW.jpg" width="400" height="400">
 <pre>
 package main
