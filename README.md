@@ -1,31 +1,31 @@
 <h1>Rectangle Coordinates Window</h1>
 
-æ—¥æœ¬èª:<br>
+“ú–{Œê:<br>
 https://ja.wikipedia.org/wiki/%E7%9B%B4%E4%BA%A4%E5%BA%A7%E6%A8%99%E7%B3%BB<br>
 English:<br>
 https://en.wikipedia.org/wiki/Cartesian_coordinate_system<br>
 
-<h2>get/å…¥æ‰‹</h2>
+<h2>get command/“üèƒRƒ}ƒ“ƒh</h2>
 
 <pre>
 go get github.com/intelfike/rcwindow
 </pre>
 
-<h2>Usage/ä½¿ã„æ–¹</h2>
+<h2>Usage/g‚¢•û</h2>
 
 <pre>
 rc := rcwindow.NewWindow(1, 1, 10)
-//rc(struct) configration here //rcæ§‹é€ ä½“ã‚’ã“ã“ã§ç·¨é›†ã™ã‚‹
+//rc(struct) configration here //rc\‘¢‘Ì‚ğ‚±‚±‚Å•ÒW‚·‚é
 rc.Start()
 rc.Dot(0.4, -0.3)
 rc.Draw()
 rc.Wait() //OR rc.End()
 </pre>
 
-<h2>Example/ä¾‹</h2>
+<h2>Example/—á</h2>
 
 <img src="https://github.com/intelfike/images/blob/master/RCM2.png" width="400" height="400">
-ç‚¹ãŒãã‚‹ãã‚‹å›è»¢ã—ã¾ã™ã€‚
+“_‚ª‚­‚é‚­‚é‰ñ“]‚µ‚Ü‚·B
 <pre>
 package main
 
@@ -37,6 +37,7 @@ import (
 
 func main() {
 	rc := rcwindow.NewWindow(1, 1, 10)
+    rc.DotSize = 4
 	rc.Start()
 	c := cmplx.Pow(1i, 1.0/25.0)
 	v := 1i
@@ -62,6 +63,7 @@ import (
 
 func main() {
 	rc := rcwindow.NewWindow(1, 1, 1000)
+    rc.DotSize = 4
 	rc.Start()
 	rc.DrawTick(1 << 25)
 	c := cmplx.Pow(1i, 1.0/25.0)
@@ -75,20 +77,20 @@ func main() {
 }
 </pre>
 
-<h2>Argument/å¼•æ•°</h2>
+<h2>Argument/ˆø”</h2>
 <b>func NewWindow(scaleX, scaleY float64, bufSize int) *rcConfig</b><br>
 NewWindow(scale(max)X, scale(max)Y, bufSize=>Dots Array(ring buffer) Size)<br>
-NewWindow(Xè»¸ã®æœ€å¤§å€¤ã€Yè»¸ã®æœ€å¤§å€¤ã€ãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚º=>ç‚¹ã®é…åˆ—(ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡)ã®å¤§ãã•)<br>
+NewWindow(X²‚ÌÅ‘å’lAY²‚ÌÅ‘å’lAƒoƒbƒtƒ@ƒTƒCƒY=>“_‚Ì”z—ñ(ƒŠƒ“ƒOƒoƒbƒtƒ@)‚Ì‘å‚«‚³)<br>
 <br>
 <b>func (rc *rcConfig) Dot(x, y float64)</b><br>
 Dot(x, y)<br>
-Dot(xåº§æ¨™ã®ä½ç½®, yåº§æ¨™ã®ä½ç½®)<br>
+Dot(xÀ•W‚ÌˆÊ’u, yÀ•W‚ÌˆÊ’u)<br>
 <br>
-<b>func (rc *rcConfig) DrawTick(tick time.Duration)</b>
-func (rc *rcConfig) DrawTick((redraw loop interval))
-func (rc *rcConfig) DrawTick(å†æç”»ã®é–“éš”ã‚’æŒ‡å®š)
+<b>func (rc *rcConfig) DrawTick(tick time.Duration)</b><br>
+func (rc *rcConfig) DrawTick((redraw loop interval))<br>
+func (rc *rcConfig) DrawTick(Ä•`‰æ‚ÌŠÔŠu‚ğw’è)<br>
 
-<h2>Event/ã‚¤ãƒ™ãƒ³ãƒˆ</h2>
+<h2>Event/ƒCƒxƒ“ƒg</h2>
 
 click => Print x & y<br>
 KeyPress Esc => close window<br>
@@ -96,8 +98,8 @@ KeyPress UpArrow => Scale / 1.2<br>
 KeyPress DownArrow => Scale * 1.2<br>
 KeyPress R => redraw(for debuging)<br>
 
-ã‚¯ãƒªãƒƒã‚¯ => Xã¨Yã®åº§æ¨™ã‚’è¨ˆç®—ã—ã¦è¡¨ç¤ºã—ã¾ã™ã€‚<br>
-Escã‚­ãƒ¼ => ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦ã‚’é–‰ã˜ã¾ã™ã€‚<br>
-â†‘ã‚­ãƒ¼ => ã‚¹ã‚±ãƒ¼ãƒ«ã‚’1.2åˆ†ã®1ã«ç¸®å°ã—ã¾ã™ã€‚<br>
-â†“ã‚­ãƒ¼ => ã‚¹ã‚±ãƒ¼ãƒ«ã‚’1.2å€ã«æ‹¡å¤§ã—ã¾ã™ã€‚<br>
-Rã‚­ãƒ¼ => æç”»ã‚’æ›´æ–°ã—ã¾ã™ã€‚(ãƒ‡ãƒãƒƒã‚°ç”¨)<br>
+ƒNƒŠƒbƒN => X‚ÆY‚ÌÀ•W‚ğŒvZ‚µ‚Ä•\¦‚µ‚Ü‚·B<br>
+EscƒL[ => ƒEƒCƒ“ƒhƒE‚ğ•Â‚¶‚Ü‚·B<br>
+ªƒL[ => ƒXƒP[ƒ‹‚ğ1.2•ª‚Ì1‚Ék¬‚µ‚Ü‚·B<br>
+«ƒL[ => ƒXƒP[ƒ‹‚ğ1.2”{‚ÉŠg‘å‚µ‚Ü‚·B<br>
+RƒL[ => •`‰æ‚ğXV‚µ‚Ü‚·B(ƒfƒoƒbƒO—p)<br>
