@@ -182,11 +182,11 @@ func xyWindow(rc *rcConfig){
 					case key.CodeUpArrow:
 						rc.ScaleX /= 1.1
 						rc.ScaleY /= 1.1
-						rc.Draw()
+						rc.win.Send(paint.Event{})
 					case key.CodeDownArrow:
 						rc.ScaleX *= 1.1
 						rc.ScaleY *= 1.1
-						rc.Draw()
+						rc.win.Send(paint.Event{})
 					}
 				}
 			case paint.Event:
