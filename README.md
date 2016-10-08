@@ -58,7 +58,6 @@ package main
 import (
 	"math/cmplx"
 	"github.com/intelfike/rcwindow"
-	"time"
 )
 
 func main() {
@@ -71,7 +70,6 @@ func main() {
 	for n := 0; n <= 400; n++{
 		rc.Dot(float64(n)/200 - 1, imag(v))
 		v *= c
-		time.Sleep(1)
 	}
 	rc.Wait()
 }
