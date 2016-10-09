@@ -140,7 +140,7 @@ func xyWindow(rc *rcConfig){
 					}
 					v := *rc.Dots[m]
 					x, y := rc.parse(v.x, v.y)
-					rectDraw(x - rc.DotSize/2, y - rc.DotSize/2, x + int(float64(rc.DotSize)/2.0 + 0.5), y + int(float64(rc.DotSize)/2.0 + 0.5), rc.DotColor)
+					rectDraw(x - rc.DotSize/2, y - rc.DotSize/2, x + int(float64(rc.DotSize)/2.0 + 0.5), y + int(float64(rc.DotSize)/2.0 + 0.5), v.col)
 				}
 				cur = icount
 				
@@ -186,7 +186,7 @@ func xyWindow(rc *rcConfig){
 					if p != nil{
 						v := *p
 						x, y := rc.parse(v.x, v.y)
-						rectDraw(x - rc.DotSize/2, y - rc.DotSize/2, x + int(float64(rc.DotSize)/2.0 + 0.5), y + int(float64(rc.DotSize)/2.0 + 0.5), rc.DotColor)
+						rectDraw(x - rc.DotSize/2, y - rc.DotSize/2, x + int(float64(rc.DotSize)/2.0 + 0.5), y + int(float64(rc.DotSize)/2.0 + 0.5), v.col)
 					}else{
 						break
 					}

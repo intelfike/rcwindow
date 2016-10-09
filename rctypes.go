@@ -17,6 +17,7 @@ type Base struct{
 
 type Dot struct{
 	x, y float64
+	col color.Color
 }
 type rcConfig struct{
 	ScaleX, ScaleY float64
@@ -42,12 +43,15 @@ func (rc *rcConfig) SafeConfig(f func()){
 	f()
 }
 func (rc *rcConfig) Dot(x, y float64){
+	rc.Dotc(x, y, rc.DotColor)
+}
+func (rc *rcConfig) Dotc(x, y float64, col color.Color){
 	rc.mx.Lock()
 	defer rc.mx.Unlock()
 	switch rc.state{
 	case "running":
 		//fmt.Println(rc.index, x, y)
-		rc.Dots[rc.index % len(rc.Dots)] = &Dot{x, y}
+		rc.Dots[rc.index % len(rc.Dots)] = &Dot{x, y, col}
 		rc.index++
 		icount++
 		rc.index %= len(rc.Dots)
@@ -58,6 +62,9 @@ func (rc *rcConfig) Dot(x, y float64){
 	}
 }
 func (rc *rcConfig) FillX(f func(float64)(float64), delay func()){
+	rc.FillXc(f, delay, rc.DotColor)
+}
+func (rc *rcConfig) FillXc(f func(float64)(float64), delay func(), col color.Color){
 	xv := fscaleX * 2 / float64(rc.Len())
 	for n := 0; ; n++{
 		if rc.state != "running"{
@@ -69,10 +76,40 @@ func (rc *rcConfig) FillX(f func(float64)(float64), delay func()){
 			return
 		}
 		y := f(x)
-		rc.Dot(x, y)
+		rc.Dotc(x, y, col)
 		if fscaleY * -1 < y && y < fscaleY{
 			delay()
 		}
+		
+	}
+}
+func (rc *rcConfig) FillXm(f func(float64)([]float64), delay func()){
+	c := make([]color.Color, len(f(0)))
+	for n, _ := range c{
+		c[n] = rc.DotColor
+	}
+	rc.FillXmc(f, delay, c)
+}
+func (rc *rcConfig) FillXmc(f func(float64)([]float64), delay func(), col []color.Color){
+	xv := fscaleX * 2 / float64(rc.Len())
+	for n := 0; ; {
+		if rc.state != "running"{
+			return
+		}
+		x := xv * float64(n)
+		x -= fscaleX
+		if x > fscaleX{
+			return
+		}
+		y := f(x)
+		for m, v := range y{
+			rc.Dotc(x, v, col[m % len(col)])
+			if fscaleY * -1 < v && v < fscaleY{
+				delay()
+			}
+			n++
+		}
+		
 	}
 }
 func (rc *rcConfig) Draw(){
