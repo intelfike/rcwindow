@@ -62,9 +62,6 @@ func (rc *rcConfig) Dotc(x, y float64, col color.Color){
 	}
 }
 func (rc *rcConfig) FillX(f func(float64)(float64), delay func()){
-	rc.FillXc(f, delay, rc.DotColor)
-}
-func (rc *rcConfig) FillXc(f func(float64)(float64), delay func(), col color.Color){
 	xv := fscaleX * 2 / float64(rc.Len())
 	for n := 0; ; n++{
 		if rc.state != "running"{
@@ -76,23 +73,15 @@ func (rc *rcConfig) FillXc(f func(float64)(float64), delay func(), col color.Col
 			return
 		}
 		y := f(x)
-		rc.Dotc(x, y, col)
+		rc.Dot(x, y)
 		if fscaleY * -1 < y && y < fscaleY{
 			delay()
 		}
-		
 	}
 }
-func (rc *rcConfig) FillXm(f func(float64)([]float64), delay func()){
-	c := make([]color.Color, len(f(0)))
-	for n, _ := range c{
-		c[n] = rc.DotColor
-	}
-	rc.FillXmc(f, delay, c)
-}
-func (rc *rcConfig) FillXmc(f func(float64)([]float64), delay func(), col []color.Color){
+func (rc *rcConfig) FillXc(f func(float64)(float64, color.Color), delay func()){
 	xv := fscaleX * 2 / float64(rc.Len())
-	for n := 0; ; {
+	for n := 0; ; n++{
 		if rc.state != "running"{
 			return
 		}
@@ -101,15 +90,11 @@ func (rc *rcConfig) FillXmc(f func(float64)([]float64), delay func(), col []colo
 		if x > fscaleX{
 			return
 		}
-		y := f(x)
-		for m, v := range y{
-			rc.Dotc(x, v, col[m % len(col)])
-			if fscaleY * -1 < v && v < fscaleY{
-				delay()
-			}
-			n++
+		y, c := f(x)
+		rc.Dotc(x, y, c)
+		if fscaleY * -1 < y && y < fscaleY{
+			delay()
 		}
-		
 	}
 }
 func (rc *rcConfig) Draw(){
