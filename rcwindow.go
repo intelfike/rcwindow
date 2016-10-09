@@ -4,9 +4,7 @@ import (
 	"log"
 	"image"
 	"image/color"
-	"sync"
 	"os"
-	"time"
 	
 	"golang.org/x/exp/shiny/driver"
 	"golang.org/x/exp/shiny/screen"
@@ -20,146 +18,71 @@ import (
 	"golang.org/x/image/draw"
 )
 
-type Dot struct{
-	x, y float64
-}
-type rcConfig struct{
-	ScaleX, ScaleY float64
-	Width, Height int
-	Dots []Dot
-	DotSize int
-	index int
+var(
+	atomic = true
 	win screen.Window
-	wg sync.WaitGroup
-	mx sync.Mutex
-	sx, sy float64
-	state string
-	change bool
-	//Axis == Line
-	DotColor ,AxisColor color.Color
-}
-func (rc *rcConfig) Start(){
-	switch rc.state{
-	case "":
-		go xyWindow(rc)
-		rc.wg.Add(1)
-		rc.wg.Wait()
-		rc.state = "running"
-	default:
-		fmt.Println("Start:Already started.")
-		os.Exit(1)
-	}
-}
-func (rc *rcConfig) Dot(x, y float64){
-	switch rc.state{
-	case "running":
-		rc.Dots[rc.index % len(rc.Dots)] = Dot{x, y}
-		rc.index++
-		rc.index %= len(rc.Dots)
-		rc.change = true
-	default:
-		fmt.Println("Dot:Not running.")
-		os.Exit(1)
-	}
-}
-func (rc *rcConfig) Draw(){
-	switch rc.state{
-	case "running":
-		if rc.change{
-			rc.win.Send(paint.Event{})
-			rc.change = false
-		}
-	}
-}
-func (rc *rcConfig) DrawTick(tick time.Duration){
-	go func(){
-		for{
-			rc.mx.Lock()
-			rc.Draw()
-			rc.mx.Unlock()
-			time.Sleep(tick)
-		}
-	}()
-}
-func (rc *rcConfig) Wait(){
-	switch rc.state{
-	case "running":
-		rc.Draw()
-		rc.state = "waiting"
-		rc.wg.Add(1)
-		rc.wg.Wait()
-		rc.state = "running"
-	case "waiting":
-		fmt.Println("Wait:Already waiting.")
-		os.Exit(1)
-	default:
-		fmt.Println("Wait:Not running.")
-		os.Exit(1)
-	}
-}
-func (rc *rcConfig) End(){
-	switch rc.state{
-	case "running", "waiting":
-		rc.state = "end"
-		rc.win.Send(lifecycle.Event{To:lifecycle.StageDead})
-	default:
-		fmt.Println("End:Not running")
-		os.Exit(1)
-	}
-	rc.wg.Add(1)
-	rc.wg.Wait()
-}
-//Axis座標→window座標
-func (rc *rcConfig)parse(fx, fy float64)(int, int){
-	x := rc.Width / 2 + int(fx * rc.sx)
-	y := rc.Height / 2 + int(fy * rc.sy)
-	y = rc.Height - y
-	return x, y
-}
-//window座標→Axis座標
-func (rc *rcConfig)parseR(x, y float64)(float64, float64){
-	fx := (x - float64(rc.Width/2)) / rc.sx
-	fy := (y - float64(rc.Height/2)) / rc.sy * -1
-	return fx, fy
-}
+	buf screen.Buffer
+	fscaleX, fscaleY float64//fix scale
+	relX, relY float64
+	icount int
+)
+
 
 func NewWindow(scaleX, scaleY float64, bufSize int) *rcConfig{
+	if !atomic{
+		fmt.Println("NewWindow:already make window")
+		os.Exit(1)
+	}
+	atomic = false
 	//set default
-	return &rcConfig{
-		ScaleX: scaleX,
-		ScaleY: scaleY,
-		Width:700,
-		Height:700,
-		Dots: make([]Dot, bufSize),
-		DotSize: 2,
+	rc := &rcConfig{
+		ScaleX:		scaleX,
+		ScaleY:		scaleY,
+		width:		700,
+		height:		700,
+		Dots:		make([]*Dot, bufSize),
+		DotSize:	2,
 		DotColor:	color.RGBA{0xff, 0xff, 0x00, 0xff},
 		AxisColor:	color.White,
+		FrameColor:	color.White,
+		Move:		0.1,
+		Magni:		1.1,
 	}
-	
+	rc.sx = float64(rc.width) / (rc.ScaleX * 2.0)
+	rc.sy = float64(rc.height) / (rc.ScaleY * 2.0)
+	rc.state = "running"
+	fscaleX = scaleX
+	if fscaleX < 0{fscaleX *= -1.0}
+	fscaleY = scaleY
+	if fscaleY < 0{fscaleY *= -1.0}
+	go xyWindow(rc)
+	rc.wg.Add(1)
+	rc.wg.Wait()
+	return rc
 }
 
 func xyWindow(rc *rcConfig){
 	driver.Main(func(s screen.Screen) {
 		var op = screen.NewWindowOptions{
-			Width : rc.Width,
-			Height : rc.Height,
+			Width : rc.width,
+			Height : rc.height,
 		}
-		rc.win, _ = s.NewWindow(&op)
-		if rc.win == nil {
+		win, _ = s.NewWindow(&op)
+		if win == nil {
 			fmt.Println("err")
 			return
 		}
-		defer rc.win.Release()
-		var buf screen.Buffer
+		defer win.Release()
 		defer func() {
 			if buf != nil {
 				buf.Release()
 			}
 		}()
+		cur := 0
 		fmt.Println("draw.")
 		rc.wg.Done()
 		for {
-			e := rc.win.NextEvent()
+			e := win.NextEvent()
 			//fmt.Printf("%#v\n", e)
 			switch e := e.(type) {
 			case lifecycle.Event:
@@ -169,58 +92,109 @@ func xyWindow(rc *rcConfig){
 			case mouse.Event:
 				if e.Direction == mouse.DirPress{
 					x, y := rc.parseR(float64(e.X), float64(e.Y))
-					fmt.Printf("[x=%0.3f,y=%0.3f]", x, y)
+					fmt.Printf("[x=%0.10f,y=%0.10f]", x, y)
 				}
 				
 			case key.Event:
 				if e.Direction == key.DirNone || e.Direction == key.DirPress{
+					rc.mx.Lock()
 					switch e.Code{
 					case key.CodeEscape:
+						rc.mx.Unlock()
 						return
 					case key.CodeR:
-	 					rc.Draw()
+	 					
+	 				case key.CodeC:
+	 					relX = 0.0
+	 					relY = 0.0
+	 					rc.ScaleX = fscaleX
+	 					rc.ScaleY = fscaleY
+					case key.CodeX:
+						rc.ScaleX /= rc.Magni
+						rc.ScaleY /= rc.Magni
+					case key.CodeZ:
+						rc.ScaleX *= rc.Magni
+						rc.ScaleY *= rc.Magni
 					case key.CodeUpArrow:
-						rc.ScaleX /= 1.1
-						rc.ScaleY /= 1.1
-						rc.win.Send(paint.Event{})
+						relY -= rc.ScaleY * rc.Move
 					case key.CodeDownArrow:
-						rc.ScaleX *= 1.1
-						rc.ScaleY *= 1.1
-						rc.win.Send(paint.Event{})
+						relY += rc.ScaleY * rc.Move
+					case key.CodeLeftArrow:
+						relX += rc.ScaleX * rc.Move
+					case key.CodeRightArrow:
+						relX -= rc.ScaleX * rc.Move
+					default:
+						goto none
 					}
+					win.Send(size.Event{WidthPx:rc.width, HeightPx:rc.height})
+					none:
+					rc.mx.Unlock()
 				}
 			case paint.Event:
- 				rc.win.Send(size.Event{WidthPx:rc.Width, HeightPx:rc.Height})
+ 				//win.Send(size.Event{WidthPx:rc.width, HeightPx:rc.height})
+				rc.mx.Lock()
+				for n := cur; n != icount; n++{
+					m := n % len(rc.Dots)
+					if rc.Dots[m] == nil{
+						continue
+					}
+					v := *rc.Dots[m]
+					x, y := rc.parse(v.x, v.y)
+					rectDraw(x - rc.DotSize/2, y - rc.DotSize/2, x + int(float64(rc.DotSize)/2.0 + 0.5), y + int(float64(rc.DotSize)/2.0 + 0.5), rc.DotColor)
+				}
+				cur = icount
+				
+				rc.mx.Unlock()
+				//更新
+				win.Upload(image.Point{0, 0}, buf, buf.Bounds())
+				win.Publish()
 			case size.Event:
+				if buf != nil{
+					buf.Release()
+				}
 				var err error
 				buf, err = s.NewBuffer(e.Size())
 				if err != nil{
 					continue
 				}
-				rc.Width = e.WidthPx
-				rc.Height = e.HeightPx
-				rc.sx = float64(rc.Width) / (rc.ScaleX * 2.0)
-				rc.sy = float64(rc.Height) / (rc.ScaleY * 2.0)
-				//vertical line
-				r := image.Rect(rc.Width/2, 0, rc.Width/2 + 1, rc.Height)
-				draw.Draw(buf.RGBA(), r, image.NewUniform(rc.AxisColor), image.ZP, draw.Src)
-				//horizontal line
-				r = image.Rect(0, rc.Height/2, rc.Width, rc.Height/2 + 1)
-				draw.Draw(buf.RGBA(), r, image.NewUniform(rc.AxisColor), image.ZP, draw.Src)
-				//point
+				rc.width = e.WidthPx
+				rc.height = e.HeightPx
+				
 				rc.mx.Lock()
-				for _, v := range rc.Dots{
-					if v.x != 0 && v.y != 0{
+				rc.sx = float64(rc.width) / (rc.ScaleX * 2.0)
+				rc.sy = float64(rc.height) / (rc.ScaleY * 2.0)
+				cenx, ceny := rc.parse(0, 0)
+				
+				var dy Base
+				dy.right, dy.top = rc.parse(rc.ScaleX - relX, rc.ScaleY - relY)
+				dy.left, dy.bottom = rc.parse(-rc.ScaleX - relX, -rc.ScaleY - relY)
+				//vertical line
+				rectDraw(cenx, dy.top, cenx + 1, dy.bottom, rc.AxisColor)
+				//horizontal line
+				rectDraw(dy.right, ceny, dy.left, ceny + 1, rc.AxisColor)
+				//frame
+				var st Base
+				st.right, st.top = rc.parse(fscaleX, fscaleY)
+				st.left, st.bottom = rc.parse(-fscaleX, -fscaleY)
+				
+				rectDraw(st.left, st.top, st.right, st.top + 1, rc.FrameColor)
+				rectDraw(st.left, st.bottom, st.right, st.bottom + 1, rc.FrameColor)
+				rectDraw(st.left, st.top, st.left + 1, st.bottom, rc.FrameColor)
+				rectDraw(st.right, st.top, st.right + 1, st.bottom, rc.FrameColor)
+				//point
+				for _, p := range rc.Dots{
+					if p != nil{
+						v := *p
 						x, y := rc.parse(v.x, v.y)
-						r := image.Rect(x - rc.DotSize/2, y - rc.DotSize/2, x + int(float64(rc.DotSize)/2.0 + 0.5), y + int(float64(rc.DotSize)/2.0 + 0.5))
-						draw.Draw(buf.RGBA(), r, image.NewUniform(rc.DotColor), image.ZP, draw.Src)
+						rectDraw(x - rc.DotSize/2, y - rc.DotSize/2, x + int(float64(rc.DotSize)/2.0 + 0.5), y + int(float64(rc.DotSize)/2.0 + 0.5), rc.DotColor)
+					}else{
+						break
 					}
 				}
 				rc.mx.Unlock()
 				//更新
-				rc.win.Upload(image.Point{0, 0}, buf, buf.Bounds())
-				buf.Release()
-				rc.win.Publish()
+				win.Upload(image.Point{0, 0}, buf, buf.Bounds())
+				win.Publish()
 			case error:
 				log.Print(e)
 			}
@@ -236,4 +210,7 @@ func xyWindow(rc *rcConfig){
 	rc.state = ""
 	
 }
-
+func rectDraw(x, y, x2, y2 int, c color.Color){
+	r := image.Rect(x, y, x2, y2)
+	draw.Draw(buf.RGBA(), r, image.NewUniform(c), image.ZP, draw.Src)
+}
