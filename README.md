@@ -2,11 +2,11 @@
 
 日本語:<br>
 https://ja.wikipedia.org/wiki/%E7%9B%B4%E4%BA%A4%E5%BA%A7%E6%A8%99%E7%B3%BB<br>
-これをGUI(Shiny)で表示してくれます。<br>
+これをGUI(shiny)で表示してくれます。<br>
 <br>
 English:<br>
 https://en.wikipedia.org/wiki/Cartesian_coordinate_system<br>
-Shiny display this<br>
+this package display this with "shiny"<br>
 
 <h2>get command/入手コマンド</h2>
 
