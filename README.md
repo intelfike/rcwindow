@@ -1,42 +1,115 @@
 <h1>Rectangle Coordinates Window</h1>
 
-“ú–{Œê:<br>
+æ—¥æœ¬èª:<br>
 https://ja.wikipedia.org/wiki/%E7%9B%B4%E4%BA%A4%E5%BA%A7%E6%A8%99%E7%B3%BB<br>
-‚±‚ê‚ğGUI(shiny)‚Å•\¦‚µ‚Ä‚­‚ê‚Ü‚·B<br>
+ã“ã‚Œã‚’GUI(shiny)ã§è¡¨ç¤ºã—ã¦ãã‚Œã¾ã™ã€‚<br>
 <br>
 English:<br>
 https://en.wikipedia.org/wiki/Cartesian_coordinate_system<br>
 this package display this with "shiny"<br>
 
-<h2>get command/“üèƒRƒ}ƒ“ƒh</h2>
+<h2>get command/å…¥æ‰‹ã‚³ãƒãƒ³ãƒ‰</h2>
 
 <pre>
 go get github.com/intelfike/rcwindow
 </pre>
 
-<h2>Argument/ˆø”</h2>
+<h2>usage/ä½¿ã„æ–¹</h2>
+
+<pre>
+rc := rcwindow.NewWindow(1, 1, 10)	//Create window
+rc.Dot(0.5, 0.5)	//Draw dot
+rc.Wait()	//Wait or End
+</pre>
+
+<h2>method/ãƒ¡ã‚½ãƒƒãƒ‰</h2>
+<pre>
+type RCConfig struct {
+	ScaleX, ScaleY float64	//set by the argument of NewWindow() function
+	Dots    []*Dot 		//set by the argument of Dotc() and Dot() function
+	DotSize int 	//Default Size
+	DotColor, AxisColor, FrameColor color.Color 	//Default Color
+	Move  float64
+	Magni float64
+}
+</pre>
+
+<b>func NewWindow(scaleX, scaleY float64, bufSize int) *RCConfig</b><br>
+Create Window<br>
+<br>
+<b>func (rc *RCConfig) Clear()</b><br>
+Clear Dots<br>
+<br>
+<b>func (rc *RCConfig) Dot(x, y float64)</b><br>
+Add Dot (default color and don't display)<br>
+<br>
+<b>func (rc *RCConfig) Dotc(x, y float64, col color.Color)</b><br>
+Add Dot with to setting color<br>
+<br>
+<b>func (rc *RCConfig) Dotcmplx(com complex128)</b><br>
+x = real(com), y = imag(com)<br>
+<br>
+<b>func (rc *RCConfig) Dotcmplxc(com complex128, col color.Color)</b><br>
+x = real(com), y = imag(com), setting color<br>
+<br>
+<b>func (rc *RCConfig) Draw()</b><br>
+Additional display added Dot with Dot() function<br>
+<br>
+<b>func (rc *RCConfig) DrawTick(tick time.Duration)</b><br>
+Automatically call the Draw()<br>
+Recommend (1 << 23)ã€€ï½ã€€(1 << 25)<br>
+<br>
+<b>func (rc *RCConfig) End()</b><br>
+Draw and End<br>
+<br>
+<b>func (rc *RCConfig) FillX(f func(float64) float64, delay func())</b><br>
+Argument of func(float64) is value of x.<br>
+<br>
+<b>func (rc *RCConfig) FillXc(f func(float64) (float64, color.Color), delay func())</b><br>
+FillX and setting color<br>
+<br>
+<b>func (rc *RCConfig) Len() int</b><br>
+buffer size set by the argument of NewWindow() function<br>
+<br>
+<b>func (rc *RCConfig) Redraw()</b><br>
+Display Dot in the ring buffer<br>
+Must slower than the Dot() function<br>
+<br>
+<b>func (rc *RCConfig) RedrawTick(tick time.Duration)</b><br>
+Automatically call the Redraw()<br>
+Recommend (1 << 23)ã€€ï½ã€€(1 << 25)<br>
+<br>
+<b>func (rc *RCConfig) SafeConfig(f func())</b><br>
+This function for Thread safe.<br>
+<br>
+<b>func (rc *RCConfig) Wait()</b><br>
+Draw and Wait<br>
+<br>
+
+
+<h2>Argument/å¼•æ•°</h2>
 <b>func NewWindow(scaleX, scaleY float64, bufSize int) *rcConfig</b><br>
 NewWindow(scale(max)X, scale(max)Y, bufSize=>Dots Array(ring buffer) Size)<br>
-NewWindow(X²‚ÌÅ‘å’lAY²‚ÌÅ‘å’lAƒoƒbƒtƒ@ƒTƒCƒY=>“_‚Ì”z—ñ(ƒŠƒ“ƒOƒoƒbƒtƒ@)‚Ì‘å‚«‚³)<br>
+NewWindow(Xè»¸ã®æœ€å¤§å€¤ã€Yè»¸ã®æœ€å¤§å€¤ã€ãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚º=>ç‚¹ã®é…åˆ—(ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡)ã®å¤§ãã•)<br>
 <br>
 <b>func (rc *rcConfig) Dot(x, y float64)</b><br>
 Dot(x, y)<br>
-Dot(xÀ•W‚ÌˆÊ’u, yÀ•W‚ÌˆÊ’u)<br>
+Dot(xåº§æ¨™ã®ä½ç½®, yåº§æ¨™ã®ä½ç½®)<br>
 <br>
 <b>func (rc *rcConfig) DrawTick(tick time.Duration)</b><br>
 func (rc *rcConfig) DrawTick((draw loop interval))<br>
-func (rc *rcConfig) DrawTick(•`‰æ‚ÌŠÔŠu‚ğw’è)<br>
+func (rc *rcConfig) DrawTick(æç”»ã®é–“éš”ã‚’æŒ‡å®š)<br>
 <br>
 <b>func (rc *rcConfig) RedrawTick(tick time.Duration)</b><br>
 func (rc *rcConfig) RedrawTick((redraw loop interval))<br>
-func (rc *rcConfig) RedrawTick(Ä•`‰æ‚ÌŠÔŠu‚ğw’è)<br>
+func (rc *rcConfig) RedrawTick(å†æç”»ã®é–“éš”ã‚’æŒ‡å®š)<br>
 <br>
 <b>func (rc *rcConfig) FillX(func(float64)(float64), func())</b><br>
 func (rc *rcConfig) FillX((Argument:x Return:y), Delay)<br>
-func (rc *rcConfig) FillX((ˆø”:x –ß‚è’l:y), ’x‰„ˆ—)<br>
+func (rc *rcConfig) FillX((å¼•æ•°:x æˆ»ã‚Šå€¤:y), é…å»¶å‡¦ç†)<br>
 
 
-<h2>Event/ƒCƒxƒ“ƒg</h2>
+<h2>Event/ã‚¤ãƒ™ãƒ³ãƒˆ</h2>
 
 click => Print x & y<br>
 KeyPress Esc => close window<br>
@@ -45,9 +118,9 @@ KeyPress Z or X => Magnification<br>
 KeyPress C => Undo the Move & Magnification<br>
 KeyPress R => redraw(for debuging)<br>
 
-ƒNƒŠƒbƒN => X‚ÆY‚ÌÀ•W‚ğŒvZ‚µ‚Ä•\¦‚µ‚Ü‚·B<br>
-EscƒL[ => ƒEƒCƒ“ƒhƒE‚ğ•Â‚¶‚Ü‚·B<br>
-–îˆóƒL[ => ˆÚ“®<br>
-Z‚ÆXƒL[ => ”{—¦•ÏX<br>
-CƒL[ => ˆÚ“®‚Æ”{—¦‚ğ‚à‚Æ‚É–ß‚·<br>
-RƒL[ => •`‰æ‚ğXV‚µ‚Ü‚·B(ƒfƒoƒbƒO—p)<br>
+ã‚¯ãƒªãƒƒã‚¯ => Xã¨Yã®åº§æ¨™ã‚’è¨ˆç®—ã—ã¦è¡¨ç¤ºã—ã¾ã™ã€‚<br>
+Escã‚­ãƒ¼ => ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦ã‚’é–‰ã˜ã¾ã™ã€‚<br>
+çŸ¢å°ã‚­ãƒ¼ => ç§»å‹•<br>
+Zã¨Xã‚­ãƒ¼ => å€ç‡å¤‰æ›´<br>
+Cã‚­ãƒ¼ => ç§»å‹•ã¨å€ç‡ã‚’ã‚‚ã¨ã«æˆ»ã™<br>
+Rã‚­ãƒ¼ => æç”»ã‚’æ›´æ–°ã—ã¾ã™ã€‚(ãƒ‡ãƒãƒƒã‚°ç”¨)<br>
