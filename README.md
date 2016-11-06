@@ -5,13 +5,13 @@ https://ja.wikipedia.org/wiki/%E7%9B%B4%E4%BA%A4%E5%BA%A7%E6%A8%99%E7%B3%BB<br>
 これをGUI(shiny)で表示してくれます。<br>
 <br>
 
-<h2>get command/入手コマンド</h2>
+<h2>getコマンド</h2>
 
 <pre>
 go get github.com/intelfike/rcwindow
 </pre>
 
-<h2>usage/使い方</h2>
+<h2>使い方</h2>
 
 <pre>
 rc := rcwindow.NewWindow(1, 1, 10)	//ウィンドウを表示
@@ -20,7 +20,7 @@ rc.Wait()	//処理を待機(待機しないとメインスレッドと同時に�
 終了してしまう)
 </pre>
 
-<h2>method/メソッド</h2>
+<h2>構造体とメソッド</h2>
 <pre>
 type RCConfig struct {
 	ScaleX, ScaleY float64	//set by the argument of NewWindow() function
@@ -33,7 +33,7 @@ type RCConfig struct {
 </pre>
 
 <b>func NewWindow(scaleX, scaleY float64, bufSize int) *RCConfig</b><br>
-ウィンドウを作成て表示します。<br>
+ウィンドウを作成して表示します。<br>
 <br>
 <b>func (rc *RCConfig) Clear()</b><br>
 セットされたドットをすべて削除して再描画します。<br>
@@ -66,7 +66,7 @@ func(float64)の引数はx軸の値で、戻り値はy軸の値です。<br>
 NewWindow()で指定されたバッファサイズを埋めるようにxの増加量が調整されます。<br>
 <br>
 <b>func (rc *RCConfig) FillXc(f func(float64) (float64, color.Color), delay func())</b><br>
-FillX and setting color<br>
+色を指定できるFillX()です。<br>
 <br>
 <b>func (rc *RCConfig) Len() int</b><br>
 NewWindow()で指定したバッファサイズです。<br>
@@ -87,7 +87,7 @@ Draw()を呼び出してウィンドウの終了を待機します。<br>
 <br>
 
 
-<h2>Argument/引数</h2>
+<h2>引数</h2>
 <b>func NewWindow(scaleX, scaleY float64, bufSize int) *rcConfig</b><br>
 NewWindow(X軸の最大値、Y軸の最大値、バッファサイズ=>点の配列(リングバッファ)の大きさ)<br>
 <br>
@@ -104,7 +104,7 @@ func (rc *rcConfig) RedrawTick(再描画の間隔を指定)<br>
 func (rc *rcConfig) FillX((引数:x 戻り値:y), 遅延処理)<br>
 
 
-<h2>Event/イベント</h2>
+<h2>イベント</h2>
 
 クリック => XとYの座標を計算して表示します。<br>
 Escキー => ウインドウを閉じます。<br>
